@@ -24,5 +24,58 @@ This documentation will be organised by the following stages, offering insights 
 - Command and Control (C2): Suspicious beaconing patterns.
 - Exfiltration: Unusual data transfer volumes.
 
-## Ransomware
-Hypotheses targeting file encryption activities, malicious PowerShell execution, or network-wide lateral movement.
+# Hypothesis: Detection of Ransomware Activities via Unusual File Modifications and Encryption Patterns
+
+## Overview
+This hypothesis focuses on detecting early-stage ransomware activities by analysing unusual file modifications, rapid encryption of files, and abnormal processes associated with encryption tools.
+
+## Objective
+To identify suspicious patterns indicative of ransomware activity before widespread damage occurs.
+
+## Key Indicators to Monitor
+1. **File System Activity**:
+   - High volume of file modifications in a short time.
+   - File extensions being renamed to unusual or encrypted formats (e.g., `.lock`, `.encrypted`).
+
+2. **Process Behaviour**:
+   - Unknown or unauthorised processes rapidly accessing multiple files.
+   - Processes using high CPU resources indicative of encryption.
+
+3. **Network Activity**:
+   - Outbound connections to known malicious IPs or domains (e.g., C2 servers).
+   - Abnormal use of SMB or other protocols for lateral file encryption.
+
+4. **Defence Evasion**:
+   - Processes attempting to disable Microsoft Defender or other endpoint protections.
+   - Tampering with event logs or deleting shadow copies.
+
+## Hypothesis Statement
+"If a process triggers a high volume of file modifications and shows signs of encryption activity, combined with defence evasion attempts and abnormal network connections, it is likely to be part of ransomware execution."
+
+
+## Tools & Methodologies
+
+### 1. **Log Analysis (Microsoft Sentinel)**  
+- Query to identify rapid file modifications:
+  
+ ```
+  kql
+  FileEvents
+  | where ActionType == "FileModified"
+  | summarize Count = count() by FileName, Timestamp, User, DeviceId
+  | where Count > 100 and Timestamp between (now(-1h) .. now())
+```
+- Query to detect defence evasion:
+  
+ ```kql
+DeviceEvents
+| where ActionType == "AntivirusDisabled" or ActionType == "SecurityToolTampered"
+| summarize Count = count() by DeviceId, User, Timestamp
+ ```
+
+### 2. Endpoint Detection (Microsoft Defender for Endpoints)
+Hunt for specific process names or hashes tied to ransomware campaigns.
+Use built-in behaviour monitoring to flag encryption-related processes.
+### 3. Data Parsing (CyberChef)
+Extract file extension changes from logs or file metadata for anomaly detection.
+

@@ -1,5 +1,5 @@
 # Hypothesis-Driven_Threat_Detection
-This GitHub project provides Threat Intelligence Analysts with a comprehensive framework to create, validate, and test hypotheses for identifying suspicious activities, vulnerabilities, and malicious actions within network environments. The repository emphasises real-world methodologies while maintaining a sector-agnostic approach, ensuring applicability across industries. By combining technical tools and best practices, the project aims to enable effective threat detection and actionable insights.
+This project provides Threat Intelligence Analysts with a comprehensive framework to create, validate, and test hypotheses for identifying suspicious activities, vulnerabilities, and malicious actions within network environments. The repository emphasises real-world methodologies while maintaining a sector-agnostic approach, ensuring applicability across industries. By combining technical tools and best practices, the project aims to enable effective threat detection and actionable insights.
 
 ## Prioritised Threats
 
@@ -93,4 +93,63 @@ Summarise:
 - Timeline of detected activities.
 - Indicators of compromise (IOCs) like file hashes, IPs, or domain names.
 - Mitigation steps and their expected outcomes.
+
+# Hypothesis: Detection of Suspicious Privileged Account Activity Indicative of Insider Threats
+
+## Overview
+This hypothesis addresses the possibility of a trusted insider (employee, contractor, or partner) abusing privileges to access sensitive data or exfiltrate information.
+
+## Objective
+To detect unusual or unauthorised activity by privileged accounts, focusing on abnormal access patterns, data downloads, and attempts to bypass security controls.
+
+## Key Indicators to Monitor
+1. **Authentication and Authorisation Events**:
+   - Privileged account logins during unusual hours or from abnormal locations.
+   - Use of shared credentials or simultaneous logins from different IPs.
+
+2. **Data Access Patterns**:
+   - Access to files, databases, or systems not related to the user's role.
+   - Large-scale file downloads or unauthorised data transfers.
+
+3. **System Changes**:
+   - Modifications to security configurations (e.g., disabling logging).
+   - Creation of backdoor accounts or changes to Active Directory group memberships.
+
+4. **Defence Evasion**:
+   - Deletion of logs or tampering with monitoring tools.
+   - Use of anonymisation tools (e.g., VPNs or Tor) by internal accounts.
+
+---
+
+## Hypothesis Statement
+"If a privileged account demonstrates unusual access patterns or unauthorised actions such as accessing sensitive data, transferring files, or disabling security measures, it is likely being misused as part of an insider threat."
+
+---
+
+## Tools & Methodologies
+
+### 1. **Log Analysis (Microsoft Sentinel)**  
+- Query for unusual login times:
+  
+```
+  kql
+  SigninLogs
+  | where UserPrincipalName contains "@"
+  | where TimeGenerated between (now(-7d) .. now())
+  | summarize Count = count() by UserPrincipalName, bin(TimeGenerated, 1h)
+  | where Count > 1 and hour(TimeGenerated) < 6
+```
+- Query for large data transfers:
+```
+FileEvents
+| where ActionType == "FileDownloaded"
+| summarize DataTransferred = sum(FileSizeInBytes) by UserPrincipalName, DeviceName, Timestamp
+| where DataTransferred > 1e9
+```
+### 2. Endpoint Monitoring (Microsoft Defender for Endpoints)
+- Track changes to critical system files or audit logs: Example Tampering with EventLog or registry values related to monitoring tools.
+- Use behaviour analytics to detect role violations.
+
+### 3. Data Parsing (CyberChef)
+- Extract and normalise timestamps from logs to visualise trends in data access.
 

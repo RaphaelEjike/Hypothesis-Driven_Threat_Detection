@@ -79,3 +79,18 @@ Use built-in behaviour monitoring to flag encryption-related processes.
 ### 3. Data Parsing (CyberChef)
 Extract file extension changes from logs or file metadata for anomaly detection.
 
+
+### Expected Results
+- Identification of processes with a high rate of file modifications.
+- Detection of unauthorised defence evasion activities.
+- Visibility into suspicious network traffic indicative of C2 communication.
+### Mitigation Recommendations
+- Enable file activity monitoring in Microsoft Sentinel.
+- Apply Microsoft Defender's ransomware protection policies.
+- Block known malicious IPs/domains and enforce network segmentation.
+### Sharing Findings
+Summarise:
+- Timeline of detected activities.
+- Indicators of compromise (IOCs) like file hashes, IPs, or domain names.
+- Mitigation steps and their expected outcomes.
+

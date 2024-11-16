@@ -80,15 +80,15 @@ Use built-in behaviour monitoring to flag encryption-related processes.
 Extract file extension changes from logs or file metadata for anomaly detection.
 
 
-### Expected Results
+## Expected Results
 - Identification of processes with a high rate of file modifications.
 - Detection of unauthorised defence evasion activities.
 - Visibility into suspicious network traffic indicative of C2 communication.
-### Mitigation Recommendations
+## Mitigation Recommendations
 - Enable file activity monitoring in Microsoft Sentinel.
 - Apply Microsoft Defender's ransomware protection policies.
 - Block known malicious IPs/domains and enforce network segmentation.
-### Sharing Findings
+## Sharing Findings
 Summarise:
 - Timeline of detected activities.
 - Indicators of compromise (IOCs) like file hashes, IPs, or domain names.
@@ -152,4 +152,108 @@ FileEvents
 
 ### 3. Data Parsing (CyberChef)
 - Extract and normalise timestamps from logs to visualise trends in data access.
+
+
+## Expected Results
+- Detection of login patterns outside of normal business hours or from suspicious geolocations.
+- Identification of large data transfers or access to sensitive resources unrelated to the user’s role.
+- Alerts on tampering with monitoring tools or logs.
+## Mitigation Recommendations
+1. Implement conditional access policies to block abnormal login locations or times.
+2. Monitor privileged account activity using Microsoft Sentinel.
+3. Enforce least privilege access and role-based access controls (RBAC).
+## Sharing Findings
+Use the reporting_template.md in the workflows/ folder to summarise:
+-Timeline of detected activities.
+-Indicators of compromise (IOCs) like user IDs, access logs, or IP addresses.
+-Mitigation strategies implemented or recommended.
+
+
+
+# Hypothesis: Detection of Zero-Day Exploitation through Behavioural Anomalies and Indicators of Compromise (IOCs)
+
+## Overview
+This hypothesis focuses on identifying potential zero-day exploit activity by analysing abnormal behaviours, suspicious network traffic, and indicators of exploitation, even when no specific vulnerability signature exists.
+
+## Objective
+To detect early signs of zero-day attacks by observing anomalous activity patterns, including privilege escalation, process injection, and unusual outbound communication.
+
+## Key Indicators to Monitor
+1. **Endpoint Behaviour**:
+   - Processes behaving unusually, such as spawning unexpected child processes.
+   - Use of legitimate tools for malicious purposes (e.g., PowerShell, WMI).
+
+2. **Privilege Escalation**:
+   - Creation of new privileged user accounts or modification of existing accounts.
+   - Exploitation attempts targeting kernel or system-level access.
+
+3. **Network Traffic**:
+   - Outbound connections to new, previously unseen IP addresses.
+   - Use of non-standard ports or encrypted traffic patterns.
+
+4. **Persistence Mechanisms**:
+   - Registry changes or new entries indicating persistence.
+   - Dropping of payloads or scripts in startup directories.
+  
+
+
+
+
+
+---
+
+## Hypothesis Statement
+"If a previously unseen exploit is being used in an attack, it will exhibit anomalous behaviours such as unusual process activity, privilege escalation attempts, and connections to external infrastructure, which can be identified by behavioural analysis and traffic monitoring."
+
+---
+
+## Tools & Methodologies
+
+### 1. **Log Analysis (Microsoft Sentinel)**  
+- Query for unexpected child processes:
+
+```
+kql
+  ProcessEvents
+  | where ParentProcessName == "explorer.exe" and ProcessName != "explorer.exe"
+  | summarize Count = count() by ProcessName, ParentProcessName, DeviceName, Timestamp
+```
+- Query for privilege escalation:
+
+```
+kql
+SecurityEvent
+| where EventID in (4672, 4688)
+| summarize Count = count() by Account, DeviceName, EventID, Timestamp
+```
+
+### 2. Network Monitoring (Microsoft Defender for Endpoints)
+- Hunt for anomalous outbound traffic: Monitor connections to new IP addresses using:
+
+```
+kql
+NetworkConnectionEvents
+| where DestinationIP !in (known_safe_IPs)
+| summarize Count = count() by DestinationIP, DeviceName, Timestamp
+
+```
+
+### 3. Data Parsing (CyberChef)
+- Decode or analyse payloads captured during the traffic monitoring stage.
+
+## Expected Results
+- Identification of anomalous process behaviours that do not align with expected patterns.
+- Detection of unusual or suspicious privilege escalation events.
+- Visibility into outbound connections to unknown IPs or domains, indicating C2 communication.
+  
+## Mitigation Recommendations
+1. Implement behaviour-based threat detection systems (e.g., Defender ATP).
+2. Apply strict egress firewall rules to block unknown IPs and domains.
+3.  Enable advanced logging to capture detailed endpoint and network telemetry.
+
+## Sharing Findings
+- Timeline of detected activities.
+- Indicators of compromise (IOCs) like process names, IP addresses, or file hashes.
+- Suggested mitigation strategies for securing vulnerable systems.
+
 

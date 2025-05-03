@@ -1,4 +1,4 @@
-# Hypothesis-Driven_Threat_Detection
+# Hypothesis-Driven Threat Detection
 This project provides Threat Intelligence Analysts with a comprehensive framework to create, validate, and test hypotheses for identifying suspicious activities, vulnerabilities, and malicious actions within network environments. The repository emphasises real-world methodologies while maintaining a sector-agnostic approach, ensuring applicability across industries. By combining technical tools and best practices, the project aims to enable effective threat detection and actionable insights.
 
 ## Prioritised Threats
